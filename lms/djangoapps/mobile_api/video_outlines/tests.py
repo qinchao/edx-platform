@@ -238,6 +238,7 @@ class TestNonStandardCourseStructure(MobileAPITestCase, TestVideoAPIMixin):
         ItemFactory.create(
             parent=self.course,
             category="video",
+            category="video",
             display_name=u"test factory video omega \u03a9",
         )
         course_outline = self.api_response().data
