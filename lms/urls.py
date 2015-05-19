@@ -611,12 +611,20 @@ if settings.FEATURES.get('ENABLE_THIRD_PARTY_AUTH'):
     )
 
 # OAuth token exchange
-if settings.FEATURES.get('ENABLE_THIRD_PARTY_AUTH') and settings.FEATURES.get('ENABLE_OAUTH2_PROVIDER'):
+if settings.FEATURES.get('ENABLE_OAUTH2_PROVIDER'):
+    if settings.FEATURES.get('ENABLE_THIRD_PARTY_AUTH'):
+        urlpatterns += (
+            url(
+                r'^oauth2/exchange_access_token/(?P<backend>[^/]+)/$',
+                oauth_exchange.views.AccessTokenExchangeView.as_view(),
+                name="exchange_access_token"
+            ),
+        )
     urlpatterns += (
         url(
-            r'^oauth2/exchange_access_token/(?P<backend>[^/]+)/$',
-            oauth_exchange.views.AccessTokenExchangeView.as_view(),
-            name="exchange_access_token"
+            r'^oauth2/exchange_session_cookie/$',
+            oauth_exchange.views.SessionCookieExchangeView.as_view(),
+            name="exchange_session_cookie"
         ),
     )
 

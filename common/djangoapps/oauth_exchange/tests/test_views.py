@@ -12,9 +12,10 @@ from django.test import TestCase
 import httpretty
 import provider.constants
 from provider import scope
-from provider.oauth2.models import AccessToken
+from provider.oauth2.models import AccessToken, Client
 
 from oauth_exchange.tests.utils import AccessTokenExchangeTestMixin
+from student.tests.factories import UserFactory
 from third_party_auth.tests.utils import ThirdPartyOAuthTestMixinFacebook, ThirdPartyOAuthTestMixinGoogle
 
 
@@ -113,3 +114,30 @@ class AccessTokenExchangeViewTestGoogle(
     Tests for AccessTokenExchangeView used with Google
     """
     pass
+
+
+@unittest.skipUnless(settings.FEATURES.get("ENABLE_OAUTH2_PROVIDER"), "OAuth2 not enabled")
+class TestSessionCookieExchangeView(TestCase):
+    """
+    Tests for SessionCookieExchangeView
+    """
+    def setUp(self):
+        self.user = UserFactory()
+        self.oauth2_client = Client.objects.create(client_type=0)
+
+    def _verify_response(self, access_token, expected_status_code, expected_num_cookies):
+        url = reverse("exchange_session_cookie")
+        response = self.client.get(url, HTTP_AUTHORIZATION="Bearer {0}".format(access_token))
+        self.assertEqual(response.status_code, expected_status_code)
+        self.assertEqual(len(response.cookies), expected_num_cookies)
+
+    def test_success(self):
+        access_token = AccessToken.objects.create(
+            token="test_access_token",
+            client=self.oauth2_client,
+            user=self.user,
+        )
+        self._verify_response(access_token, expected_status_code=204, expected_num_cookies=1)
+
+    def test_unauthenticated(self):
+        self._verify_response("invalid_token", expected_status_code=401, expected_num_cookies=0)
