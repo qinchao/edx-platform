@@ -179,7 +179,7 @@ class CourseTab(object):
         tab_type = available_tab_types[tab_dict['type']]
         tab_type.validate(tab_dict)
         # TODO: don't import openedx capabilities from common
-        from openedx.core.djangoapps.course_views.tabs import CourseViewType
+        from openedx.core.djangoapps.course_views.course_views import CourseViewType
         if issubclass(tab_type, CourseViewType):
             return CourseViewTab(tab_type, tab_dict=tab_dict)
         else:
@@ -201,7 +201,7 @@ class CourseTabManager(object):
 
             # Add any registered course views
             # TODO: don't import openedx capabilities from common
-            from openedx.core.djangoapps.course_views.tabs import CourseViewTypeManager
+            from openedx.core.djangoapps.course_views.course_views import CourseViewTypeManager
             for course_view_type in CourseViewTypeManager.get_available_plugins().values():
                 tab_types[course_view_type.name] = course_view_type
 
@@ -222,11 +222,31 @@ class CourseViewTab(CourseTab):
         )
         self.type = course_view_type.name
         self.course_view_type = course_view_type
+        self.is_hideable = course_view_type.is_hideable
+        self.is_hidden = tab_dict.get('is_hidden', False) if tab_dict else False
 
     def is_enabled(self, course, settings, user=None):
         if not super(CourseViewTab, self).is_enabled(course, settings, user=user):
             return False
         return self.course_view_type.is_enabled(course, settings, user=user)
+
+    def __getitem__(self, key):
+        if key == 'is_hidden':
+            return self.is_hidden
+        else:
+            return super(CourseViewTab, self).__getitem__(key)
+
+    def __setitem__(self, key, value):
+        if key == 'is_hidden':
+            self.is_hidden = value
+        else:
+            super(CourseViewTab, self).__setitem__(key, value)
+
+    def to_json(self):
+        to_json_val = super(CourseViewTab, self).to_json()
+        if self.is_hidden:
+            to_json_val.update({'is_hidden': True})
+        return to_json_val
 
 
 class CourseTabList(List):

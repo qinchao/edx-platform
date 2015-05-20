@@ -22,6 +22,7 @@ setup(
             "ccx = lms.djangoapps.ccx.plugins:CcxCourseViewType",
             "edxnotes = lms.djangoapps.edxnotes.plugins:EdxNotesCourseViewType",
             "instructor = lms.djangoapps.instructor.views.instructor_dashboard:InstructorDashboardViewType",
+            'wiki = lms.djangoapps.course_wiki.tab:WikiCourseViewType',
             "courseware = openedx.core.djangoapps.course_views.tabs:CoursewareTab",
             "course_info = openedx.core.djangoapps.course_views.tabs:CourseInfoTab",
             'wiki = openedx.core.djangoapps.course_views.tabs:WikiTab',

@@ -4,7 +4,7 @@ from django.views.decorators.cache import cache_control
 from edxmako.shortcuts import render_to_response
 from django.core.urlresolvers import reverse
 
-from openedx.core.djangoapps.course_views.tabs import CourseViewType
+from openedx.core.djangoapps.course_views.course_views import CourseViewType
 
 from courseware.courses import get_course_with_access
 from courseware.access import has_access

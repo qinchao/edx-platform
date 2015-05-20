@@ -4,7 +4,7 @@ from mock import MagicMock, patch
 import unittest
 
 import xmodule.tabs as xmodule_tabs
-import openedx.core.djangoapps.course_views.tabs as tabs
+import openedx.core.djangoapps.course_views.course_views as tabs
 from xmodule.modulestore.tests.factories import CourseFactory
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 
@@ -32,8 +32,8 @@ class TabTestCase(ModuleStoreTestCase):
         user.is_authenticated = lambda: is_authenticated
         return user
 
-    @patch('openedx.core.djangoapps.course_views.tabs.is_user_enrolled_or_staff')
-    @patch('openedx.core.djangoapps.course_views.tabs.is_user_staff')
+    @patch('openedx.core.djangoapps.course_views.course_views.is_user_enrolled_or_staff')
+    @patch('openedx.core.djangoapps.course_views.course_views.is_user_staff')
     def is_tab_enabled(self, tab, course, settings, user, is_staff_mock=None, is_enrolled_or_staff_mock=None):
         """
         Returns true if the specified tab is enabled.
@@ -204,7 +204,6 @@ class TabListTestCase(TabTestCase):
             [
                 {'type': tabs.CoursewareTab.type},
                 {'type': tabs.CourseInfoTab.type, 'name': 'fake_name'},
-                {'type': tabs.WikiTab.type, 'name': 'fake_name'},
                 {'type': tabs.DiscussionTab.type, 'name': 'fake_name'},
                 {'type': tabs.ExternalLinkTab.type, 'name': 'fake_name', 'link': 'fake_link'},
                 {'type': tabs.TextbookTabs.type},
@@ -271,58 +270,6 @@ class ProgressTestCase(TabTestCase):
         )
 
 
-class WikiTestCase(TabTestCase):
-    """Test cases for Wiki Tab."""
-
-    def check_wiki_tab(self):
-        """Helper function for verifying the wiki tab."""
-        return self.check_tab(
-            tab_class=tabs.WikiTab,
-            dict_tab={'type': tabs.WikiTab.type, 'name': 'same'},
-            expected_link=self.reverse('course_wiki', args=[self.course.id.to_deprecated_string()]),
-            expected_tab_id=tabs.WikiTab.type,
-            invalid_dict_tab=self.fake_dict_tab,
-        )
-
-    def test_wiki_enabled_and_public(self):
-        """
-        Test wiki tab when Enabled setting is True and the wiki is open to
-        the public.
-        """
-        self.settings.WIKI_ENABLED = True
-        self.course.allow_public_wiki_access = True
-        tab = self.check_wiki_tab()
-        self.check_can_display_results(tab)
-
-    def test_wiki_enabled_and_not_public(self):
-        """
-        Test wiki when it is enabled but not open to the public
-        """
-        self.settings.WIKI_ENABLED = True
-        self.course.allow_public_wiki_access = False
-        tab = self.check_wiki_tab()
-        self.check_can_display_results(tab, for_enrolled_users_only=True, for_staff_only=True)
-
-    def test_wiki_enabled_false(self):
-        """Test wiki tab when Enabled setting is False"""
-
-        self.settings.WIKI_ENABLED = False
-        tab = self.check_wiki_tab()
-        self.check_can_display_results(tab, expected_value=False)
-
-    def test_wiki_visibility(self):
-        """Test toggling of visibility of wiki tab"""
-
-        wiki_tab = tabs.WikiTab()
-        self.assertTrue(wiki_tab.is_hideable)
-        wiki_tab.is_hidden = True
-        self.assertTrue(wiki_tab['is_hidden'])
-        self.check_tab_json_methods(wiki_tab)
-        self.check_tab_equality(wiki_tab, wiki_tab.to_json())
-        wiki_tab['is_hidden'] = False
-        self.assertFalse(wiki_tab.is_hidden)
-
-
 class ExternalLinkTestCase(TabTestCase):
     """Test cases for External Link Tab."""
 
@@ -377,7 +324,7 @@ class TextbooksTestCase(TabTestCase):
         self.num_textbook_tabs = sum(1 for tab in self.course.tabs if isinstance(tab, tabs.TextbookTabsBase))
         self.num_textbooks = self.num_textbook_tabs * len(self.books)
 
-    @patch('openedx.core.djangoapps.course_views.tabs.is_user_enrolled_or_staff')
+    @patch('openedx.core.djangoapps.course_views.course_views.is_user_enrolled_or_staff')
     def test_textbooks_enabled(self, is_enrolled_or_staff_mock):
         is_enrolled_or_staff_mock.return_value = True
 
@@ -522,8 +469,8 @@ class CourseTabListTestCase(TabListTestCase):
         self.assertTrue(tabs.ExternalDiscussionTab() not in self.course.tabs)
         self.assertTrue(tabs.DiscussionTab() in self.course.tabs)
 
-    @patch('openedx.core.djangoapps.course_views.tabs.is_user_staff')
-    @patch('openedx.core.djangoapps.course_views.tabs.is_user_enrolled_or_staff')
+    @patch('openedx.core.djangoapps.course_views.course_views.is_user_staff')
+    @patch('openedx.core.djangoapps.course_views.course_views.is_user_enrolled_or_staff')
     def test_iterate_displayable(self, is_staff_mock, is_enrolled_or_staff_mock):
         is_staff_mock.return_value = True
         is_enrolled_or_staff_mock.return_value = True

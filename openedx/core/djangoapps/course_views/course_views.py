@@ -24,6 +24,7 @@ class CourseViewType(object):
     title = None
     view_name = None
     is_persistent = False
+    is_hideable = False
 
     # The course field that indicates that this feature is enabled
     feature_flag_field_name = None
@@ -100,44 +101,6 @@ class StaffTab(AuthenticatedCourseTab):
         return not user or is_user_staff(course, user)
 
 
-class HideableTab(CourseTab):
-    """
-    Abstract class for tabs that are hideable
-    """
-    is_hideable = True
-
-    def __init__(self, name, tab_id, link_func, tab_dict):
-        super(HideableTab, self).__init__(
-            name=name,
-            tab_id=tab_id,
-            link_func=link_func,
-        )
-        self.is_hidden = tab_dict.get('is_hidden', False) if tab_dict else False
-
-    def __getitem__(self, key):
-        if key == 'is_hidden':
-            return self.is_hidden
-        else:
-            return super(HideableTab, self).__getitem__(key)
-
-    def __setitem__(self, key, value):
-        if key == 'is_hidden':
-            self.is_hidden = value
-        else:
-            super(HideableTab, self).__setitem__(key, value)
-
-    def to_json(self):
-        to_json_val = super(HideableTab, self).to_json()
-        if self.is_hidden:
-            to_json_val.update({'is_hidden': True})
-        return to_json_val
-
-    def __eq__(self, other):
-        if not super(HideableTab, self).__eq__(other):
-            return False
-        return self.is_hidden == other.get('is_hidden', False)
-
-
 class CoursewareTab(EnrolledOrStaffTab):
     """
     A tab containing the course content.
@@ -201,35 +164,6 @@ class ProgressTab(EnrolledOrStaffTab):
     @classmethod
     def validate(cls, tab_dict, raise_error=True):
         return super(ProgressTab, cls).validate(tab_dict, raise_error) and need_name(tab_dict, raise_error)
-
-
-class WikiTab(HideableTab):
-    """
-    A tab_dict containing the course wiki.
-    """
-
-    type = 'wiki'
-    name = 'wiki'
-
-    def __init__(self, tab_dict=None):
-        super(WikiTab, self).__init__(
-            # Translators: "Wiki" is the name of the course's wiki page
-            name=tab_dict['name'] if tab_dict else _('Wiki'),
-            tab_id=self.type,
-            link_func=link_reverse_func('course_wiki'),
-            tab_dict=tab_dict,
-        )
-
-    def is_enabled(self, course, settings, user=None):
-        if not settings.WIKI_ENABLED:
-            return False
-        if not user or course.allow_public_wiki_access:
-            return True
-        return is_user_enrolled_or_staff(course, user)
-
-    @classmethod
-    def validate(cls, tab_dict, raise_error=True):
-        return super(WikiTab, cls).validate(tab_dict, raise_error) and need_name(tab_dict, raise_error)
 
 
 class DiscussionTab(EnrolledOrStaffTab):
