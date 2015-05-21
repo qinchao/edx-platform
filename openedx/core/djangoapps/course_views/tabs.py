@@ -489,64 +489,6 @@ class HtmlTextbookTabs(TextbookTabsBase):
             )
 
 
-class GradingTab(object):
-    """
-    Abstract class for tabs that involve Grading.
-    """
-    pass
-
-
-class StaffGradingTab(StaffTab, GradingTab):
-    """
-    A tab for staff grading.
-    """
-    type = 'staff_grading'
-    name = 'staff_grading'
-
-    def __init__(self, tab_dict=None):  # pylint: disable=unused-argument
-        super(StaffGradingTab, self).__init__(
-            # Translators: "Staff grading" appears on a tab that allows
-            # staff to view open-ended problems that require staff grading
-            name=_("Staff grading"),
-            tab_id=self.type,
-            link_func=link_reverse_func(self.type),
-        )
-
-
-class PeerGradingTab(AuthenticatedCourseTab, GradingTab):
-    """
-    A tab for peer grading.
-    """
-    type = 'peer_grading'
-    name = 'peer_grading'
-
-    def __init__(self, tab_dict=None):  # pylint: disable=unused-argument
-        super(PeerGradingTab, self).__init__(
-            # Translators: "Peer grading" appears on a tab that allows
-            # students to view open-ended problems that require grading
-            name=_("Peer grading"),
-            tab_id=self.type,
-            link_func=link_reverse_func(self.type),
-        )
-
-
-class OpenEndedGradingTab(AuthenticatedCourseTab, GradingTab):
-    """
-    A tab for open ended grading.
-    """
-    type = 'open_ended'
-    name = 'open_ended'
-
-    def __init__(self, tab_dict=None):  # pylint: disable=unused-argument
-        super(OpenEndedGradingTab, self).__init__(
-            # Translators: "Open Ended Panel" appears on a tab that, when clicked, opens up a panel that
-            # displays information about open-ended problems that a user has submitted or needs to grade
-            name=_("Open Ended Panel"),
-            tab_id=self.type,
-            link_func=link_reverse_func('open_ended_notifications'),
-        )
-
-
 class SyllabusTab(CourseTab):
     """
     A tab for the course syllabus.

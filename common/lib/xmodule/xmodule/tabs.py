@@ -157,10 +157,6 @@ class CourseTab(object):
         return {'type': self.type, 'name': self.name}
 
     @staticmethod
-    def _fetch_tab(tab_type, tab_information):
-        pass
-
-    @staticmethod
     def from_json(tab_dict):
         """
         Deserializes a CourseTab from a json-like representation.

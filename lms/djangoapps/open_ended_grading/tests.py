@@ -20,14 +20,14 @@ from xblock.fields import ScopeIds
 
 from courseware.tests import factories
 from courseware.tests.helpers import LoginEnrollmentTestCase
+from courseware.tabs import get_course_tab_list
 from lms.djangoapps.lms_xblock.runtime import LmsModuleSystem
 from student.roles import CourseStaffRole
 from student.models import unique_id_for_user
 from xmodule import peer_grading_module
 from xmodule.error_module import ErrorDescriptor
 from xmodule.modulestore.django import modulestore
-from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
-from xmodule.modulestore.tests.django_utils import TEST_DATA_MIXED_TOY_MODULESTORE
+from xmodule.modulestore.tests.django_utils import TEST_DATA_MIXED_TOY_MODULESTORE, ModuleStoreTestCase
 from xmodule.modulestore.xml_importer import import_course_from_xml
 from xmodule.open_ended_grading_classes import peer_grading_service, controller_query_service
 from xmodule.tests import test_util_open_ended
@@ -58,6 +58,16 @@ def make_instructor(course, user_email):
     Makes a given user an instructor in a course.
     """
     CourseStaffRole(course.id).add_users(User.objects.get(email=user_email))
+
+
+def has_tab(course, user, tab_name):
+    """
+    Determines whether or not the tab with the given tab name is visible for the given user in the given course.
+    """
+    request = RequestFactory().request()
+    request.user = user
+    all_tabs = get_course_tab_list(request, course)
+    return any([tab.name == tab_name for tab in all_tabs])
 
 
 class StudentProblemListMockQuery(object):
@@ -128,6 +138,11 @@ class TestStaffGradingService(ModuleStoreTestCase, LoginEnrollmentTestCase):
         self.mock_service = staff_grading_service.staff_grading_service()
 
         self.logout()
+
+    def test_staff_grading_tab(self):
+        # Get a valid user object.
+        instructor = User.objects.get(email=self.instructor)
+        self.assertTrue(has_tab(self.toy, instructor, 'Staff grading'))
 
     def test_access(self):
         """
@@ -485,6 +500,9 @@ class TestPanel(ModuleStoreTestCase):
         response = views.student_problem_list(request, self.course.id.to_deprecated_string())
         self.assertRegexpMatches(response.content, "Here is a list of open ended problems for this course.")
 
+    def test_open_ended_tab(self):
+        self.assertTrue(has_tab(self.course, self.user, 'Open Ended Panel'))
+
 
 class TestPeerGradingFound(ModuleStoreTestCase):
     """
@@ -506,6 +524,9 @@ class TestPeerGradingFound(ModuleStoreTestCase):
 
         found, url = views.find_peer_grading_module(self.course)
         self.assertEqual(found, False)
+
+    def test_peer_grading_tab(self):
+        self.assertTrue(has_tab(self.course, self.user, 'Peer grading'))
 
 
 class TestStudentProblemList(ModuleStoreTestCase):
