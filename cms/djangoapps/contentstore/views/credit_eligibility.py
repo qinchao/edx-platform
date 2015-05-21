@@ -37,10 +37,15 @@ def credit_eligibility_handler(request, course_key_string):
     if request.method == 'GET':
         # get and display all credit eligibility requirements.
         requirements = get_credit_requirements(course_key)
+
+        # show warning message to course author if 'minimum_grade_credit' of a
+        # course is not set or 0.
+        show_warning = False if course_module.minimum_grade_credit > 0 else True
         return render_to_response(
             'credit_eligibility.html',
             {
                 'requirements': requirements,
                 'context_course': course_module,
+                'show_warning': show_warning,
             }
         )
