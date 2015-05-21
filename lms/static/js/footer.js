@@ -1,6 +1,6 @@
 var edx = edx || {};
 
-(function(jQuery) {
+(function($) {
     'use strict';
 
     edx.footer = (function() {
