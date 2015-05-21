@@ -396,13 +396,7 @@ class OLXFormatChecker(unittest.TestCase):
         if xml_to_check:
             self.assertIn(xml_to_check, block_contents)
         if xml_re_to_check:
-            xml_re = re.compile(xml_re_to_check)
-            self.assertIsNotNone(
-                xml_re.search(block_contents),
-                msg='Block ({}, {}) contents of:\n{}\n don\'t match regex of:\n{}'.format(
-                    block_type, block_id, block_contents, xml_re_to_check
-                )
-            )
+            self.assertRegexMatches(xml_re_to_check, block_contents)
         if xml_parse:
             self._assert_parsed_xml(block_contents, xml_parse)
 
