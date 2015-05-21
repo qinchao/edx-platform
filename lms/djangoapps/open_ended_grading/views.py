@@ -72,7 +72,7 @@ class StaffGradingTab(CourseViewType):
     name = 'staff_grading'
     title = _("Staff grading")
     view_name = "staff_grading"
-    is_persistent = False
+    is_persistent = True
 
     @classmethod
     def is_enabled(cls, course, settings, user=None):  # pylint: disable=unused-argument
@@ -90,7 +90,7 @@ class PeerGradingTab(CourseViewType):
     # students to view open-ended problems that require grading
     title = _("Peer grading")
     view_name = "peer_grading"
-    is_persistent = False
+    is_persistent = True
 
     @classmethod
     def is_enabled(cls, course, settings, user=None):  # pylint: disable=unused-argument
@@ -108,7 +108,7 @@ class OpenEndedGradingTab(CourseViewType):
     # displays information about open-ended problems that a user has submitted or needs to grade
     title = _("Open Ended Panel")
     view_name = "open_ended_notifications"
-    is_persistent = False
+    is_persistent = True
 
     @classmethod
     def is_enabled(cls, course, settings, user=None):  # pylint: disable=unused-argument

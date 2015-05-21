@@ -991,19 +991,15 @@ def grading_handler(request, course_key_string, grader_index=None):
                 return JsonResponse()
 
 
-def is_advanced_component_present(request, advanced_components):
+def is_advanced_component_present(course, advanced_components):
     """
     Return True when one of `advanced_components` is present in the request.
 
     raises TypeError
     when request.ADVANCED_COMPONENT_POLICY_KEY is malformed (not iterable)
     """
-    if ADVANCED_COMPONENT_POLICY_KEY not in request.json:
-        return False
-
-    new_advanced_component_list = request.json[ADVANCED_COMPONENT_POLICY_KEY]['value']
     for ac_type in advanced_components:
-        if ac_type in new_advanced_component_list and ac_type in ADVANCED_COMPONENT_TYPES:
+        if ac_type in course.advanced_components and ac_type in ADVANCED_COMPONENT_TYPES:
             return True
 
 
@@ -1042,7 +1038,7 @@ def _refresh_course_tabs(request, course_module):
     for tab_type in tab_component_map.keys():
         check, component_types = tab_component_map[tab_type]
         try:
-            tab_enabled = check(request, component_types)
+            tab_enabled = check(course_module, component_types)
         except TypeError:
             # user has failed to put iterable value into advanced component list.
             # return immediately and let validation handle.
