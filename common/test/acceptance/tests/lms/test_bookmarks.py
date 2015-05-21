@@ -84,7 +84,7 @@ class BookmarksTest(BookmarksTestMixin):
         """ Bookmark a single unit """
         csrftoken = self.session.cookies['csrftoken']
         headers = {'Content-type': 'application/json', "X-CSRFToken": csrftoken}
-        url = LMS_BASE_URL + "/api/bookmarks/v0/bookmarks/?course_id=" + course_id + '&fields=path'  # pylint: disable=protected-access
+        url = LMS_BASE_URL + "/api/bookmarks/v0/bookmarks/?course_id=" + course_id + '&fields=path'
         data = json.dumps({'usage_id': usage_id})
 
         response = self.session.post(url, data=data, headers=headers, cookies=self.session.cookies)
@@ -166,11 +166,22 @@ class BookmarksTest(BookmarksTestMixin):
         # Verify bookmarked breadcrumbs
         self.assertItemsEqual(bookmarked_breadcrumbs, self.COURSE_TREE_INFO)
 
+        def _create_breadcrumb():
+            active_usage_id = self.courseware_page.active_usage_id()
+            titles = self.courseware_page.active_section_and_subsection_titles
+            return titles + [xblock.display_name for xblock in xblocks if xblock.locator == active_usage_id]
+
         # Verify link navigation
+        # for each bookmarked item/link
+        #   1. get the shown bookmarked breadcrumb trail for link
+        #   2. visit the link
+        #   3. create breadcrumb trail from active section and subsection on page
+        #   4. 1 and 3 SHOULD match
         for index in range(2):
             self.bookmarks.click_bookmark(index)
             self.courseware_page.wait_for_page()
-            self.assertEqual(xblocks[index].locator, self.courseware_page.active_usage_id())
+            expected_breadcrumb = _create_breadcrumb()
+            self.assertEqual(bookmarked_breadcrumbs[index], expected_breadcrumb)
             self.courseware_page.visit().wait_for_page()
             self.bookmarks.click_bookmarks_button()
 

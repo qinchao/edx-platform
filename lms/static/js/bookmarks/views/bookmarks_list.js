@@ -1,6 +1,6 @@
 ;(function (define, undefined) {
     'use strict';
-    define(['gettext', 'jquery', 'underscore', 'backbone', 'moment'],
+    define(['gettext', 'jquery', 'underscore', 'backbone'],
         function (gettext, $, _, Backbone, _moment) {
 
         var moment = _moment || window.moment;

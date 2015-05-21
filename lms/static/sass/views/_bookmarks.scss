@@ -12,7 +12,6 @@
 
 // Rules for Bookmarks Button
 .courseware-bookmarks-button {
-  width: flex-grid(5);
   vertical-align: top;
 
   button {
@@ -36,8 +35,7 @@
   .bookmarks-list-button {
     background: none;
     border-radius: ($baseline/4);
-    padding: ($baseline/2);
-    width: 100%;
+    padding: 9px;
 
     &:hover {
       background: none;

@@ -25,7 +25,6 @@
                 });
             },
 
-
             toggleBookmarksListView: function () {
                 if (this.bookmarksListView.areBookmarksVisible()) {
                     this.bookmarksListView.hideBookmarks();
