@@ -627,13 +627,6 @@ class SoftwareSecurePhotoVerification(PhotoVerification):
     window = models.ForeignKey(MidcourseReverificationWindow, db_index=True, null=True)
 
     @classmethod
-    def user_is_reverified_for_all(cls, course_id, user):
-        """
-        Deprecate MidcourseReverificationWindow.
-        """
-        return True
-
-    @classmethod
     def original_verification(cls, user):
         """
         Returns the most current SoftwareSecurePhotoVerification object associated with the user.
