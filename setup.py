@@ -25,7 +25,6 @@ setup(
             'wiki = lms.djangoapps.course_wiki.tab:WikiCourseViewType',
             "courseware = openedx.core.djangoapps.course_views.tabs:CoursewareTab",
             "course_info = openedx.core.djangoapps.course_views.tabs:CourseInfoTab",
-            'wiki = openedx.core.djangoapps.course_views.tabs:WikiTab',
             'discussion = openedx.core.djangoapps.course_views.tabs:DiscussionTab',
             'external_discussion = openedx.core.djangoapps.course_views.tabs:ExternalDiscussionTab',
             'external_link = openedx.core.djangoapps.course_views.tabs:ExternalLinkTab',
