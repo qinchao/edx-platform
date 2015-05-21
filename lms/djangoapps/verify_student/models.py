@@ -629,7 +629,7 @@ class SoftwareSecurePhotoVerification(PhotoVerification):
     @classmethod
     def user_is_reverified_for_all(cls, course_id, user):
         """
-        Deprecate the MidcourseReverificationWindow.
+        Deprecate MidcourseReverificationWindow.
         """
         return True
 
