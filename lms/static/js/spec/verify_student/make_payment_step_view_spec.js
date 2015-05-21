@@ -103,6 +103,7 @@ define([
                 expect($el.length).toEqual(_.size(buttons));
                 _.each(buttons, function( expectedText, expectedId ) {
                     var buttonEl = $( '#' + expectedId );
+                    buttonEl.removeAttr('disabled');
                     expect( buttonEl.length ).toEqual( 1 );
                     expect( buttonEl[0] ).toHaveClass( 'payment-button' );
                     expect( buttonEl[0] ).toHaveText( expectedText );
