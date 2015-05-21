@@ -60,16 +60,6 @@ def make_instructor(course, user_email):
     CourseStaffRole(course.id).add_users(User.objects.get(email=user_email))
 
 
-def has_tab(course, user, tab_name):
-    """
-    Determines whether or not the tab with the given tab name is visible for the given user in the given course.
-    """
-    request = RequestFactory().request()
-    request.user = user
-    all_tabs = get_course_tab_list(request, course)
-    return any([tab.name == tab_name for tab in all_tabs])
-
-
 class StudentProblemListMockQuery(object):
     """
     Mock controller query service for testing student problem list functionality.
@@ -138,11 +128,6 @@ class TestStaffGradingService(ModuleStoreTestCase, LoginEnrollmentTestCase):
         self.mock_service = staff_grading_service.staff_grading_service()
 
         self.logout()
-
-    def test_staff_grading_tab(self):
-        # Get a valid user object.
-        instructor = User.objects.get(email=self.instructor)
-        self.assertTrue(has_tab(self.toy, instructor, 'Staff grading'))
 
     def test_access(self):
         """
@@ -500,9 +485,6 @@ class TestPanel(ModuleStoreTestCase):
         response = views.student_problem_list(request, self.course.id.to_deprecated_string())
         self.assertRegexpMatches(response.content, "Here is a list of open ended problems for this course.")
 
-    def test_open_ended_tab(self):
-        self.assertTrue(has_tab(self.course, self.user, 'Open Ended Panel'))
-
 
 class TestPeerGradingFound(ModuleStoreTestCase):
     """
@@ -524,9 +506,6 @@ class TestPeerGradingFound(ModuleStoreTestCase):
 
         found, url = views.find_peer_grading_module(self.course)
         self.assertEqual(found, False)
-
-    def test_peer_grading_tab(self):
-        self.assertTrue(has_tab(self.course, self.user, 'Peer grading'))
 
 
 class TestStudentProblemList(ModuleStoreTestCase):
