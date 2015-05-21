@@ -210,8 +210,7 @@ class PhotoVerification(StatusModel):
             user=user,
             status="approved",
             created_at__gte=(earliest_allowed_date
-                             or cls._earliest_allowed_date()),
-            window=window
+                             or cls._earliest_allowed_date())
         ).exists()
 
     @classmethod
@@ -293,12 +292,11 @@ class PhotoVerification(StatusModel):
         If the verification has been denied and the user must resubmit photos, returns 'must_reverify'
 
         If window=None, this checks initial verifications
-        If window is set, this checks for the reverification associated with that window
         """
         status = 'none'
         error_msg = ''
 
-        if cls.user_is_verified(user, window=window):
+        if cls.user_is_verified(user):
             status = 'approved'
 
         elif cls.user_has_valid_or_pending(user, window=window):
