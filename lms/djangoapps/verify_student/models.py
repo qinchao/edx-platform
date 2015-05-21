@@ -203,8 +203,6 @@ class PhotoVerification(StatusModel):
         a user might have to renew periodically.
 
         If window=None, then this will check for the user's *initial* verification.
-        If window is set to anything else, it will check for the reverification
-        associated with that window.
         """
         return cls.objects.filter(
             user=user,
@@ -229,8 +227,6 @@ class PhotoVerification(StatusModel):
                 settings
             window: If window=None, this will check for the user's
                 *initial* verification.
-                If window is anything else, this will check for the
-                reverification associated with that window.
             queryset: If a queryset is provided, that will be used instead
                 of hitting the database.
 
@@ -249,8 +245,7 @@ class PhotoVerification(StatusModel):
             created_at__gte=(
                 earliest_allowed_date
                 or cls._earliest_allowed_date()
-            ),
-            window=window,
+            )
         ).order_by('-created_at')
 
     @classmethod
