@@ -163,9 +163,6 @@ class UniversalTestSetup(unittest.TestCase):
     """
     This class exists to test XML import and export between different modulestore
     classes.
-
-    Requires from subclasses:
-        self.user_id - fake user_id
     """
 
     def _create_course(self, store, course_key):
