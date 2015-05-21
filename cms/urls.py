@@ -115,7 +115,6 @@ urlpatterns += patterns(
         settings.COURSE_KEY_PATTERN), 'group_configurations_detail_handler'),
 
     url(r'^api/val/v0/', include('edxval.urls')),
-    url(r'^view_credit_eligibility/{}$'.format(COURSELIKE_KEY_PATTERN), 'credit_eligibility_handler'),
 )
 
 JS_INFO_DICT = {
@@ -171,6 +170,12 @@ if settings.FEATURES.get('AUTOMATIC_AUTH_FOR_TESTING'):
 if settings.FEATURES.get('ENTRANCE_EXAMS'):
     urlpatterns += (
         url(r'^course/{}/entrance_exam/?$'.format(settings.COURSE_KEY_PATTERN), 'contentstore.views.entrance_exam'),
+    )
+
+# enable credit eligibility feature
+if settings.FEATURES.get('ENABLE_CREDIT_ELIGIBILITY'):
+    urlpatterns += (
+        url(r'^view_credit_eligibility/{}$'.format(COURSELIKE_KEY_PATTERN), 'contentstore.views.credit_eligibility_handler'),
     )
 
 if settings.DEBUG:

@@ -1,17 +1,18 @@
 """
 Views related to operations on course objects
 """
+
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_GET
 from django.core.exceptions import PermissionDenied
+
 from openedx.core.djangoapps.credit.api import get_credit_requirements
-from edxmako.shortcuts import render_to_response
-
-from xmodule.modulestore.django import modulestore
-from opaque_keys.edx.keys import CourseKey
-
 from django_future.csrf import ensure_csrf_cookie
+from edxmako.shortcuts import render_to_response
+from opaque_keys.edx.keys import CourseKey
 from student.auth import has_course_author_access
+from xmodule.modulestore.django import modulestore
+
 
 __all__ = ['credit_eligibility_handler', ]
 
