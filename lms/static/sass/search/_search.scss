@@ -124,8 +124,7 @@
 
 
 .courseware-search-bar {
-  width: 63%;
-  @include margin-left(($baseline/10));
+   width: flex-grid(7);
 }
 
 

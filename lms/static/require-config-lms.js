@@ -149,6 +149,9 @@
                     "URI"
                 ]
             },
+            moment: {
+                noGlobal: true
+            }
             // End of needed by OVA
         }
     };

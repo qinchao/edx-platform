@@ -100,12 +100,6 @@ class CoursewarePage(CoursePage):
         attribute_value = lambda el: el.get_attribute('data-id')
         return self.q(css='#sequence-list a').filter(get_active).map(attribute_value).results[0]
 
-    @property
-    def active_section_and_subsection_titles(self):
-        """ Returns the list containing titles of active section and subsection names """
-        titles = self.q(css='div.chapter.is-open .active a').text
-        return [titles[0], titles[1].split('\n')[0]]
-
 
 class CoursewareSequentialTabPage(CoursePage):
     """
