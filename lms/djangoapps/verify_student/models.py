@@ -629,31 +629,8 @@ class SoftwareSecurePhotoVerification(PhotoVerification):
     @classmethod
     def user_is_reverified_for_all(cls, course_id, user):
         """
-        Checks to see if the student has successfully reverified for all of the
-        mandatory re-verification windows associated with a course.
-
-        This is used primarily by the certificate generation code... if the user is
-        not re-verified for all windows, then they cannot receive a certificate.
+        Deprecate the MidcourseReverificationWindow.
         """
-        all_windows = MidcourseReverificationWindow.objects.filter(course_id=course_id)
-        # if there are no windows for a course, then return True right off
-        if (not all_windows.exists()):
-            return True
-
-        for window in all_windows:
-            try:
-                # The status of the most recent reverification for each window must be "approved"
-                # for a student to count as completely reverified
-                attempts = cls.objects.filter(user=user, window=window).order_by('-updated_at')
-                attempt = attempts[0]
-                if attempt.status != "approved":
-                    return False
-            except Exception:  # pylint: disable=broad-except
-                log.exception(
-                    u"An error occurred while checking re-verification for user '{user_id}'".format(user_id=user)
-                )
-                return False
-
         return True
 
     @classmethod
@@ -950,11 +927,7 @@ class SoftwareSecurePhotoVerification(PhotoVerification):
         if not user_is_verified:
             return 'Not ID Verified'
         else:
-            user_is_re_verified = cls.user_is_reverified_for_all(course_id, user)
-            if not user_is_re_verified:
-                return 'ID Verification Expired'
-            else:
-                return 'ID Verified'
+            return 'ID Verified'
 
 
 class VerificationCheckpoint(models.Model):
