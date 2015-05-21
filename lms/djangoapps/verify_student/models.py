@@ -264,12 +264,11 @@ class PhotoVerification(StatusModel):
         Return the most recent PhotoVerification that is marked ready (i.e. the
         user has said they're set, but we haven't submitted anything yet).
 
-        If window=None, this checks for the original verification.  If window is set to
-        anything else, this will check for the reverification associated with that window.
+        If window=None, this checks for the original verification.
         """
         # This should only be one at the most, but just in case we create more
         # by mistake, we'll grab the most recently created one.
-        active_attempts = cls.objects.filter(user=user, status='ready', window=window).order_by('-created_at')
+        active_attempts = cls.objects.filter(user=user, status='ready').order_by('-created_at')
         if active_attempts:
             return active_attempts[0]
         else:
