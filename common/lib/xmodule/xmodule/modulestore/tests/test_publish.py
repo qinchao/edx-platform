@@ -23,7 +23,6 @@ from xmodule.modulestore.tests.factories import check_mongo_calls, mongo_uses_er
 from xmodule.modulestore.tests.test_cross_modulestore_import_export import (
     MongoContentstoreBuilder, MODULESTORE_SETUPS,
     DRAFT_MODULESTORE_SETUP, SPLIT_MODULESTORE_SETUP, MongoModulestoreBuilder,
-    is_split_modulestore, is_old_mongo_modulestore
 )
 
 
@@ -582,6 +581,20 @@ class UniversalTestProcedure(OLXFormatChecker, UniversalTestSetup):
                 self.export_dir,
             )
 
+    @property
+    def is_split_modulestore(self):
+        """
+        ``True`` when modulestore under test is a SplitMongoModuleStore.
+        """
+        return self.store.get_modulestore_type(self.course_key) == ModuleStoreEnum.Type.split
+
+    @property
+    def is_old_mongo_modulestore(self):
+        """
+        ``True`` when modulestore under test is a MongoModuleStore.
+        """
+        return self.store.get_modulestore_type(self.course_key) == ModuleStoreEnum.Type.mongo
+
     def assertOLXContent(self, block_type, block_id, **kwargs):
         """
         Check that the course has been exported. If not, export it, then call the check.
@@ -894,11 +907,11 @@ class ElementalUnpublishingTests(UniversalTestProcedure):
             # The units are now drafts again.
             self.assertOLXIsDraftOnly(block_list_to_unpublish)
             # MODULESTORE_DIFFERENCE:
-            if is_split_modulestore(modulestore_builder):
+            if self.is_split_modulestore:
                 # Split:
                 # The parent now has a draft *and* published item.
                 self.assertOLXIsDraftAndPublished(block_list_parent)
-            elif is_old_mongo_modulestore(modulestore_builder):
+            elif self.is_old_mongo_modulestore:
                 # Old Mongo:
                 # The parent remains published only.
                 self.assertOLXIsPublishedOnly(block_list_parent)
@@ -1035,12 +1048,12 @@ class ElementalDeleteItemTests(UniversalTestProcedure):
             # The unit is a draft.
             self.assertOLXIsDraftOnly(block_list_to_delete)
             # MODULESTORE_DIFFERENCE:
-            if is_old_mongo_modulestore(modulestore_builder):
+            if self.is_old_mongo_modulestore:
                 # Old Mongo throws no exception when trying to delete an item from the published branch
                 # that isn't yet published.
                 self.delete_item(block_list_to_delete, revision=revision)
                 self._check_for_item_deletion(block_list_to_delete, result)
-            elif is_split_modulestore(modulestore_builder):
+            elif self.is_split_modulestore:
                 if revision in (ModuleStoreEnum.RevisionOption.published_only, ModuleStoreEnum.RevisionOption.all):
                     # Split throws an exception when trying to delete an item from the published branch
                     # that isn't yet published.
@@ -1158,14 +1171,14 @@ class ElementalDeleteItemTests(UniversalTestProcedure):
             self.delete_item(block_list_to_delete, revision=revision)
             self._check_for_item_deletion(block_list_to_delete, result)
             # MODULESTORE_DIFFERENCE
-            if is_split_modulestore(modulestore_builder):
+            if self.is_split_modulestore:
                 # Split:
                 if revision == ModuleStoreEnum.RevisionOption.published_only:
                     # If deleting published_only items, the children that are drafts remain.
                     self.assertOLXIsDraftOnly(block_list_children)
                 else:
                     self.assertOLXIsDeleted(block_list_children)
-            elif is_old_mongo_modulestore(modulestore_builder):
+            elif self.is_old_mongo_modulestore:
                 # Old Mongo:
                 # If deleting draft_only or both items, the drafts will be deleted.
                 self.assertOLXIsDeleted(block_list_children)
@@ -1212,14 +1225,14 @@ class ElementalDeleteItemTests(UniversalTestProcedure):
             self._check_for_item_deletion(block_list_to_delete, result)
             self.assertOLXIsDeleted(autopublished_children)
             # MODULESTORE_DIFFERENCE
-            if is_split_modulestore(modulestore_builder):
+            if self.is_split_modulestore:
                 # Split:
                 if revision == ModuleStoreEnum.RevisionOption.published_only:
                     # If deleting published_only items, the children that are drafts remain.
                     self.assertOLXIsDraftOnly(block_list_draft_children)
                 else:
                     self.assertOLXIsDeleted(block_list_draft_children)
-            elif is_old_mongo_modulestore(modulestore_builder):
+            elif self.is_old_mongo_modulestore:
                 # Old Mongo:
                 # If deleting draft_only or both items, the drafts will be deleted.
                 self.assertOLXIsDeleted(block_list_draft_children)
@@ -1248,11 +1261,11 @@ class ElementalConvertToDraftTests(UniversalTestProcedure):
             # Now, convert the same vertical to draft.
             self.convert_to_draft(block_list_to_convert)
             # MODULESTORE_DIFFERENCE:
-            if is_split_modulestore(modulestore_builder):
+            if self.is_split_modulestore:
                 # Split:
                 # This operation is a no-op is Split since there's always a draft version maintained.
                 self.assertOLXIsPublishedOnly(block_list_to_convert)
-            elif is_old_mongo_modulestore(modulestore_builder):
+            elif self.is_old_mongo_modulestore:
                 # Old Mongo:
                 # A draft -and- a published block now exists.
                 self.assertOLXIsDraftAndPublished(block_list_to_convert)
@@ -1269,13 +1282,13 @@ class ElementalConvertToDraftTests(UniversalTestProcedure):
             # Sequentials are auto-published.
             self.assertOLXIsPublishedOnly(block_list_to_convert)
             # MODULESTORE_DIFFERENCE:
-            if is_split_modulestore(modulestore_builder):
+            if self.is_split_modulestore:
                 # Split:
                 # Now, convert the same sequential to draft.
                 self.convert_to_draft(block_list_to_convert)
                 # This operation is a no-op is Split since there's always a draft version maintained.
                 self.assertOLXIsPublishedOnly(block_list_to_convert)
-            elif is_old_mongo_modulestore(modulestore_builder):
+            elif self.is_old_mongo_modulestore:
                 # Old Mongo:
                 # Direct-only categories are never allowed to be converted to draft.
                 with self.assertRaises(InvalidVersionError):
