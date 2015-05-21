@@ -574,6 +574,9 @@
             'annotator_1.2.9': {
                 exports: 'Annotator',
                 deps: ['jquery']
+            },
+            moment: {
+                noGlobal: true
             }
         }
     });
