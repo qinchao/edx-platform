@@ -173,15 +173,12 @@ def _get_pep8_violations():
 
     sh('pep8 . | tee {report_dir}/pep8.report -a'.format(report_dir=report_dir))
 
-    count, violations_list = _style_violations(
-        "{report_dir}/pep8.report".format(report_dir=report_dir),
-        collect_list=True
-    )
+    count, violations_list = _pep8_violations("{report_dir}/pep8.report".format(report_dir=report_dir))
 
     return (count, violations_list)
 
 
-def _style_violations(report_file, collect_list=False):
+def _pep8_violations(report_file):
     """
     Returns a tuple of (num_violations, violations_list) for all
     pep8 violations in the given report_file.
@@ -189,9 +186,7 @@ def _style_violations(report_file, collect_list=False):
     with open(report_file) as f:
         violations_list = f.readlines()
     num_lines = len(violations_list)
-    if collect_list:
-        return num_lines, violations_list
-    return num_lines
+    return num_lines, violations_list
 
 
 @task
@@ -266,7 +261,7 @@ def run_jshint(options):
         ),
         ignore_error=True
     )
-    num_violations = _style_violations(jshint_report)
+    num_violations = _get_count_from_last_line(jshint_report)
 
     # Fail number of violations is greater than the limit
     if num_violations > violations_limit > -1:
@@ -275,6 +270,24 @@ def run_jshint(options):
                 count=num_violations, violations_limit=violations_limit
             )
         )
+
+
+def _get_last_report_line(filename):
+    """
+    Returns the last line of a given file. Used for getting output from quality output files.
+    """
+    with open(filename, 'r') as report_file:
+        lines = report_file.readlines()
+        return lines[len(lines) - 1]
+
+
+def _get_count_from_last_line(filename):
+    """
+    This will return the number in a line that looks something like "3000 errors found". It is returning
+    the digits only (as an integer).
+    """
+    last_line = _get_last_report_line(filename)
+    return int(re.search(r'\d+', last_line).group(0))
 
 
 @task
