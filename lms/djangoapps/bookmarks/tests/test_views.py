@@ -51,39 +51,32 @@ class BookmarksViewTestsMixin(ModuleStoreTestCase):
         sequential_1 = ItemFactory.create(
             parent_location=chapter_1.location, category='sequential', display_name="Lesson 1"
         )
-        vertical_1 = ItemFactory.create(
+        self.vertical_1 = ItemFactory.create(
             parent_location=sequential_1.location, category='vertical', display_name='Subsection 1'
-        )
-        self.video_1 = ItemFactory.create(
-            parent_location=vertical_1.location, category="video", display_name="1st bookmarked Video"
         )
         self.bookmark_1 = BookmarkFactory.create(
             user=self.user,
             course_key=self.course_id,
-            usage_key=self.video_1.location,
-            display_name=self.video_1.display_name
+            usage_key=self.vertical_1.location,
+            display_name=self.vertical_1.display_name
         )
-
         chapter_2 = ItemFactory.create(
             parent_location=self.course.location, category='chapter', display_name="Week 2"
         )
         sequential_2 = ItemFactory.create(
-            parent_location=chapter_2.location, category='sequential', display_name="Lesson 1"
+            parent_location=chapter_2.location, category='sequential', display_name="Lesson 2"
         )
         vertical_2 = ItemFactory.create(
-            parent_location=sequential_2.location, category='vertical', display_name='Subsection 1'
+            parent_location=sequential_2.location, category='vertical', display_name='Subsection 2'
         )
-        video2 = ItemFactory.create(
-            parent_location=vertical_2.location, category="video", display_name="2nd bookmarked Video"
-        )
-        self.video_3 = ItemFactory.create(
-            parent_location=vertical_2.location, category="video", display_name="3rd bookmarked Video"
+        self.vertical_3 = ItemFactory.create(
+            parent_location=sequential_2.location, category='vertical', display_name='Subsection 3'
         )
         self.bookmark_2 = BookmarkFactory.create(
             user=self.user,
             course_key=self.course_id,
-            usage_key=video2.location,
-            display_name=video2.display_name
+            usage_key=vertical_2.location,
+            display_name=vertical_2.display_name
         )
 
     def assert_valid_bookmark_response(self, response_data, bookmark, optional_fields=False):
@@ -132,7 +125,6 @@ class BookmarksViewTests(BookmarksViewTestsMixin):
     GET /api/bookmarks/v0/bookmarks/?course_id={course_id1}
     POST /api/bookmarks/v0/bookmarks/?course_id={course_id1}
     """
-
     def test_get_bookmarks_successfully(self):
         """
         Test that requesting bookmarks for a course returns records successfully in
@@ -229,13 +221,13 @@ class BookmarksViewTests(BookmarksViewTestsMixin):
         response = self.send_post(
             client=self.client,
             url=reverse('bookmarks'),
-            json_data={'usage_id': unicode(self.video_3.location)}
+            json_data={'usage_id': unicode(self.vertical_3.location)}
         )
 
         # Assert Newly created bookmark.
-        self.assertEqual(response.data['id'], "%s,%s" % (self.user.username, unicode(self.video_3.location)))
+        self.assertEqual(response.data['id'], "%s,%s" % (self.user.username, unicode(self.vertical_3.location)))
         self.assertEqual(response.data['course_id'], self.course_id)
-        self.assertEqual(response.data['usage_id'], unicode(self.video_3.location))
+        self.assertEqual(response.data['usage_id'], unicode(self.vertical_3.location))
         self.assertIsNotNone(response.data['created'])
 
     def test_post_bookmark_with_invalid_data(self):
@@ -291,7 +283,7 @@ class BookmarksViewTests(BookmarksViewTestsMixin):
 
     def test_unsupported_methods(self):
         """
-        Test that DELETE, and PUT are not supported.
+        Test that DELETE and PUT are not supported.
         """
         self.client.login(username=self.user.username, password=self.test_password)
         self.assertEqual(405, self.client.put(reverse('bookmarks')).status_code)
@@ -302,16 +294,15 @@ class BookmarksDetailViewTests(BookmarksViewTestsMixin):
     """
     This contains the tests for GET & DELETE methods of bookmark.views.BookmarksDetailView class
     """
-
     def test_get_bookmark_successfully(self):
         """
-        The view should return a list of all courses.
+        Test that requesting bookmark returns data with 200 code.
         """
         response = self.send_get(
             client=self.client,
             url=reverse(
                 'bookmarks_detail',
-                kwargs={'username': self.user.username, 'usage_id': unicode(self.video_1.location)}
+                kwargs={'username': self.user.username, 'usage_id': unicode(self.vertical_1.location)}
             )
         )
         data = response.data
@@ -320,7 +311,7 @@ class BookmarksDetailViewTests(BookmarksViewTestsMixin):
 
     def test_get_bookmark_with_optional_fields(self):
         """
-        The view should return a list of all courses.
+        Test that requesting bookmark with optional fields returns data with 200 status code.
         """
         query_parameters = 'course_id={}&fields=path,display_name'.format(self.course_id)
 
@@ -328,7 +319,7 @@ class BookmarksDetailViewTests(BookmarksViewTestsMixin):
             client=self.client,
             url=reverse(
                 'bookmarks_detail',
-                kwargs={'username': self.user.username, 'usage_id': unicode(self.video_1.location)}
+                kwargs={'username': self.user.username, 'usage_id': unicode(self.vertical_1.location)}
             ),
             query_parameters=query_parameters
         )
@@ -338,19 +329,20 @@ class BookmarksDetailViewTests(BookmarksViewTestsMixin):
 
     def test_get_bookmark_that_belongs_to_other_user(self):
         """
+        Test that requesting bookmark that belongs to other user returns 404 status code.
         """
-
         self.send_get(
             client=self.client,
             url=reverse(
                 'bookmarks_detail',
-                kwargs={'username': 'other', 'usage_id': unicode(self.video_1.location)}
+                kwargs={'username': 'other', 'usage_id': unicode(self.vertical_1.location)}
             ),
             expected_status=404
         )
 
     def test_get_bookmark_that_does_not_exist(self):
         """
+        Test that requesting bookmark that does not exist returns 404 status code.
         """
         response = self.send_get(
             client=self.client,
@@ -365,6 +357,7 @@ class BookmarksDetailViewTests(BookmarksViewTestsMixin):
 
     def test_get_bookmark_with_invalid_usage_id(self):
         """
+        Test that requesting bookmark with invalid usage id returns 400.
         """
         response = self.send_get(
             client=self.client,
@@ -394,7 +387,7 @@ class BookmarksDetailViewTests(BookmarksViewTestsMixin):
 
     def test_delete_bookmark_successfully(self):
         """
-        The view should return a list of all courses.
+        Test that delete bookmark returns 204 status code with success.
         """
         query_parameters = 'course_id={}'.format(self.course_id)
         response = self.send_get(client=self.client, url=reverse('bookmarks'), query_parameters=query_parameters)
@@ -406,10 +399,9 @@ class BookmarksDetailViewTests(BookmarksViewTestsMixin):
             client=self.client,
             url=reverse(
                 'bookmarks_detail',
-                kwargs={'username': self.user.username, 'usage_id': unicode(self.video_1.location)}
+                kwargs={'username': self.user.username, 'usage_id': unicode(self.vertical_1.location)}
             )
         )
-
         response = self.send_get(client=self.client, url=reverse('bookmarks'), query_parameters=query_parameters)
         bookmarks = response.data['results']
 
@@ -417,18 +409,20 @@ class BookmarksDetailViewTests(BookmarksViewTestsMixin):
 
     def test_delete_bookmark_that_belongs_to_other_user(self):
         """
+        Test that delete bookmark that belongs to other user returns 404.
         """
         self.send_delete(
             client=self.client,
             url=reverse(
                 'bookmarks_detail',
-                kwargs={'username': 'other', 'usage_id': unicode(self.video_1.location)}
+                kwargs={'username': 'other', 'usage_id': unicode(self.vertical_1.location)}
             ),
             expected_status=404
         )
 
     def test_delete_bookmark_that_does_not_exist(self):
         """
+        Test that delete bookmark that does not exist returns 404.
         """
         response = self.send_delete(
             client=self.client,
@@ -443,6 +437,7 @@ class BookmarksDetailViewTests(BookmarksViewTestsMixin):
 
     def test_delete_bookmark_with_invalid_usage_id(self):
         """
+        Test that delete bookmark with invalid usage id returns 400.
         """
         response = self.send_delete(
             client=self.client,
@@ -453,3 +448,12 @@ class BookmarksDetailViewTests(BookmarksViewTestsMixin):
             expected_status=400
         )
         self.assertEqual(response.data['user_message'], "Invalid usage id")
+
+    def test_unsupported_methods(self):
+        """
+        Test that POST and PUT are not supported.
+        """
+        url = reverse('bookmarks_detail', kwargs={'username': self.user.username, 'usage_id': 'i4x'})
+        self.client.login(username=self.user.username, password=self.test_password)
+        self.assertEqual(405, self.client.put(url).status_code)
+        self.assertEqual(405, self.client.post(url).status_code)

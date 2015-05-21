@@ -3,15 +3,12 @@ This File contains Model for Bookmarks.
 """
 
 import json
-import logging
 
 from django.contrib.auth.models import User
 from django.db import models
 
 from xmodule.modulestore.django import modulestore
 from xmodule_django.models import CourseKeyField, LocationKeyField
-
-log = logging.getLogger(__name__)
 
 
 class Bookmark(models.Model):

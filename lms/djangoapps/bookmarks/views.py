@@ -7,14 +7,12 @@ import logging
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.utils.translation import ugettext as _
 
-
 from rest_framework import status
 from rest_framework import permissions
 from rest_framework.authentication import OAuth2Authentication, SessionAuthentication
 from rest_framework.generics import ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey, UsageKey
@@ -30,7 +28,6 @@ from .api import get_bookmark
 
 
 log = logging.getLogger(__name__)
-
 
 DEFAULT_FIELDS = ["id", "course_id", "usage_id", "created"]
 OPTIONAL_FIELDS = ['display_name', 'path']
@@ -107,9 +104,7 @@ class BookmarksView(ListCreateAPIView):
             log.error("Invalid course id '{course_id}'")
             return []
 
-        results_queryset = Bookmark.objects.filter(course_key=course_key, user=self.request.user).order_by('-created')
-
-        return results_queryset
+        return Bookmark.objects.filter(course_key=course_key, user=self.request.user).order_by('-created')
 
     def post(self, request):
         """
@@ -142,7 +137,8 @@ class BookmarksView(ListCreateAPIView):
             # usage_key's course_key may have an empty run property
             usage_key = usage_key.replace(course_key=modulestore().fill_in_run(usage_key.course_key))
             course_key = usage_key.course_key
-        except InvalidKeyError:
+        except InvalidKeyError as exception:
+            log.error(exception.message)
             message = _(u"Invalid usage id")
             return Response(
                 {
@@ -160,7 +156,8 @@ class BookmarksView(ListCreateAPIView):
 
         try:
             bookmark = Bookmark.create(bookmarks_data)
-        except ItemNotFoundError:
+        except ItemNotFoundError as exception:
+            log.error(exception.message)
             return Response(
                 {
                     "developer_message": u"Item with usage id not found",
@@ -168,10 +165,7 @@ class BookmarksView(ListCreateAPIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
-        return Response(
-            BookmarkSerializer(bookmark).data,
-            status=status.HTTP_201_CREATED
-        )
+        return Response(BookmarkSerializer(bookmark).data, status=status.HTTP_201_CREATED)
 
 
 class BookmarksDetailView(APIView):
@@ -234,6 +228,7 @@ class BookmarksDetailView(APIView):
         try:
             bookmarks_data = get_bookmark(request.user, usage_id, fields_to_add=optional_fields_to_add)
         except (ObjectDoesNotExist, MultipleObjectsReturned) as exception:
+            log.error(exception.message)
             return Response(
                 {
                     "developer_message": exception.message,
@@ -242,6 +237,7 @@ class BookmarksDetailView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
         except InvalidKeyError as exception:
+            log.error(exception.message)
             return Response(
                 {
                     "developer_message": exception.message,
@@ -262,6 +258,7 @@ class BookmarksDetailView(APIView):
         try:
             bookmark = get_bookmark(request.user, usage_id, serialized=False)
         except (ObjectDoesNotExist, MultipleObjectsReturned) as exception:
+            log.error(exception.message)
             return Response(
                 {
                     "developer_message": exception.message,
@@ -270,6 +267,7 @@ class BookmarksDetailView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
         except InvalidKeyError as exception:
+            log.error(exception.message)
             return Response(
                 {
                     "developer_message": exception.message,

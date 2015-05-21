@@ -1,16 +1,17 @@
 """
-File contains bookmark api method(s).
+This File contains bookmark api method(s).
 """
 from opaque_keys.edx.keys import UsageKey
 
-from xmodule.modulestore.django import modulestore
 from bookmarks.serializers import BookmarkSerializer
-
 from bookmarks.models import Bookmark
+
+from xmodule.modulestore.django import modulestore
 
 
 def get_bookmark(requested_user, usage_id, fields_to_add=None, serialized=True):
-    """Returns bookmark object or JSON response.
+    """
+    Returns bookmark object or JSON response.
 
     Args:
         requesting_user (User): The user requesting the bookmark.
