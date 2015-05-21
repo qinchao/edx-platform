@@ -3,7 +3,7 @@ var edx = edx || {};
 (function($) {
     'use strict';
 
-    edx.footer = (function() {
+    edx.footer = (function($) {
         var _fn = {
             el: '#edx-branding-footer',
 
