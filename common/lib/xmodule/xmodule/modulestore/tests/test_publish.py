@@ -384,6 +384,14 @@ class OLXFormatChecker(unittest.TestCase):
         """
         Assert that a particular block exists in a course export in the proper draft/published location
         and that the format is correct.
+
+        Arguments:
+            block_type (str): The block-type of the XBlock to check.
+            block_id (str): The block-id of the XBlock to check.
+            draft (bool): If ``True``, run the assertions against the draft version of the
+                identified XBlock.
+            xml (str): An XML snippet to search for in the exported block.
+            xml_re (str): A regex to search the XBlock content for.
         """
         course_export_dir = self._get_course_export_dir()
         is_draft = kwargs.pop('draft', False)
@@ -403,6 +411,12 @@ class OLXFormatChecker(unittest.TestCase):
     def assertOLXMissing(self, block_type, block_id, **kwargs):
         """
         Assert that a particular block does not exist in a particular draft/published location.
+
+        Arguments:
+            block_type (str): The block-type of the XBlock to check.
+            block_id (str): The block-id of the XBlock to check.
+            draft (bool): If ``True``, assert that the block identified by ``block_type``
+                ``block_id`` isn't a draft in the exported OLX.
         """
         course_export_dir = self._get_course_export_dir()
         is_draft = kwargs.pop('draft', False)
