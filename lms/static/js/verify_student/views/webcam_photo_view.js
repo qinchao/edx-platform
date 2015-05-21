@@ -284,6 +284,7 @@
 
                 // Enable the submit button
                 this.setSubmitButtonEnabled( true );
+                this.setSubmitButtonFocused( );
             }
         },
 
@@ -312,6 +313,12 @@
                 .toggleClass( 'is-disabled', !isEnabled )
                 .prop( 'disabled', !isEnabled )
                 .attr('aria-disabled', !isEnabled);
+        },
+
+        setSubmitButtonFocused: function( ){
+            $( this.submitButton )
+                .trigger('focus');
+            $('#photo_message').text("Photo Captured successfully ")
         },
 
         isMobileDevice: function() {
