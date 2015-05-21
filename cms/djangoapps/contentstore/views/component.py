@@ -29,6 +29,8 @@ from opaque_keys.edx.keys import UsageKey
 
 from student.auth import has_course_author_access
 from django.utils.translation import ugettext as _
+from django_sudo.utils import region_name
+from sudo.utils import revoke_sudo_privileges
 from models.settings.course_grading import CourseGradingModel
 
 __all__ = ['OPEN_ENDED_COMPONENT_TYPES',
@@ -158,6 +160,8 @@ def container_handler(request, usage_key_string):
 
         try:
             usage_key = UsageKey.from_string(usage_key_string)
+            # Revoke sudo privileges from a request explicitly
+            revoke_sudo_privileges(request, region=region_name(unicode(usage_key.course_key)))
         except InvalidKeyError:  # Raise Http404 on invalid 'usage_key_string'
             raise Http404
         with modulestore().bulk_operations(usage_key.course_key):
