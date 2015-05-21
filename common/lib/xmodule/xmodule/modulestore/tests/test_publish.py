@@ -423,29 +423,6 @@ class OLXFormatChecker(unittest.TestCase):
             msg='{} exists but should not!'.format(block_file_path)
         )
 
-    def _make_deprecated_block_key(self, course_key, block_type, block_id):
-        """
-        Return a block key in the deprecated format.
-        """
-        return r'i4x://{ORG}/{COURSE}/{BLOCK_TYPE}/{BLOCK_ID}'.format(
-            ORG=course_key.org,
-            COURSE=course_key.course,
-            BLOCK_TYPE=block_type,
-            BLOCK_ID=block_id,
-        )
-
-    def _make_block_key(self, course_key, block_type, block_id):
-        """
-        Return a block key in the latest format.
-        """
-        return r'block-v1:{ORG}\+{COURSE}\+{RUN}\+type@{BLOCK_TYPE}\+block@{BLOCK_ID}'.format(
-            ORG=course_key.org,
-            COURSE=course_key.course,
-            RUN=course_key.run,
-            BLOCK_TYPE=block_type,
-            BLOCK_ID=block_id,
-        )
-
     def _make_xml_parse_regex(self, block_type, course_key, draft, **kwargs):
         """
         Construct a dictionary containing regular expressions that will
@@ -471,8 +448,8 @@ class OLXFormatChecker(unittest.TestCase):
                 msg="Index within {} must be passed for draft {} item!".format(parent_type, block_type)
             )
             parent_url_regex = '({DEPRECATED_PARENT_KEY}|{PARENT_KEY})'.format(
-                DEPRECATED_PARENT_KEY=self._make_deprecated_block_key(course_key, parent_type, parent_id),
-                PARENT_KEY=self._make_block_key(course_key, parent_type, parent_id),
+                DEPRECATED_PARENT_KEY=course_key.replace(deprecated=True).make_usage_key(parent_type, parent_id),
+                PARENT_KEY=unicode(course_key.replace(deprecated=False).make_usage_key(parent_type, parent_id)).replace('+', '\\+'),
             )
             child_index_regex = '{}'.format(index_in_children_list)
 
